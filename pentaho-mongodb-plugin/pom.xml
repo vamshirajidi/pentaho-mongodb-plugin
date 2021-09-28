@@ -33,7 +33,7 @@
   <properties>
     <mockito.version>1.10.19</mockito.version>
     <junit.version>4.11</junit.version>
-    <mongo-driver.version>3.10.2</mongo-driver.version>
+    <mongo-driver-legacy.version>4.3.0</mongo-driver-legacy.version>
     <powermock-module-junit4.version>1.7.3</powermock-module-junit4.version>
     <powermock-api-mockito.version>1.7.3</powermock-api-mockito.version>
   </properties>
@@ -72,8 +72,8 @@
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>
-      <artifactId>mongo-java-driver</artifactId>
-      <version>${mongo-driver.version}</version>
+      <artifactId>mongodb-driver-legacy</artifactId>
+      <version>${mongo-driver-legacy.version}</version>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>

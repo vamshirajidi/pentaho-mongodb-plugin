@@ -20,7 +20,6 @@ package org.pentaho.di.trans.steps.mongodboutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -249,7 +248,7 @@ public class MongoDbOutputDataTest {
     when( valueMeta.isString() ).thenReturn( true );
     assertThat( MongoDbOutputData
             .getQueryObject( Arrays.asList( field1 ), rowMeta, row, space, MongoDbOutputData.MongoTopLevel.RECORD ),
-        equalTo( (DBObject) JSON.parse( query ) ) );
+        equalTo( BasicDBObject.parse( query ) ) );
 
 
   }

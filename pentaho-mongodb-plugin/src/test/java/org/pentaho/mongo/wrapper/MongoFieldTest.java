@@ -23,7 +23,6 @@
 package org.pentaho.mongo.wrapper;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.util.JSON;
 import org.bson.types.Binary;
 import org.junit.Before;
 import org.junit.Test;
@@ -134,7 +133,7 @@ public class MongoFieldTest {
 
   @Test
   public void testConvertArrayIndicesToKettleValue() throws KettleException {
-    BasicDBObject dbObj = (BasicDBObject) JSON.parse( "{ parent : { fieldName : ['valA', 'valB'] } } " );
+    BasicDBObject dbObj = BasicDBObject.parse( "{ parent : { fieldName : ['valA', 'valB'] } } " );
 
     initField( "fieldName", "$.parent.fieldName[0]", "String" );
     assertThat( field.convertToKettleValue( dbObj ), equalTo( (Object) "valA" ) );

@@ -12,13 +12,13 @@
 * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 * See the GNU Lesser General Public License for more details.
 *
-* Copyright (c) 2002-2017 Hitachi Vantara..  All rights reserved.
+* Copyright (c) 2002-2021 Hitachi Vantara..  All rights reserved.
 */
 
 package org.pentaho.di.ui.trans.steps.mongodbinput.models;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannel;
@@ -738,7 +738,7 @@ public class MongoDbModel extends XulEventSourceAdapter {
 
     for ( String tagSet : setsToTest ) {
       try {
-        DBObject set = (DBObject) JSON.parse( tagSet );
+        DBObject set = BasicDBObject.parse( tagSet );
         if ( set != null ) {
           mongoTagSets.add( set );
         }

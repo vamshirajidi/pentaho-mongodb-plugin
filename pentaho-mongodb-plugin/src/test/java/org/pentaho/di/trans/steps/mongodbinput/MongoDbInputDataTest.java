@@ -17,8 +17,8 @@
 
 package org.pentaho.di.trans.steps.mongodbinput;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -329,7 +329,7 @@ public class MongoDbInputDataTest {
   }
 
   @Test public void testGetNonExistentField() throws KettleException {
-    Object mongoO = JSON.parse( s_testData );
+    Object mongoO = BasicDBObject.parse( s_testData );
     assertTrue( mongoO instanceof DBObject );
 
     List<MongoField> discoveredFields = new ArrayList<MongoField>();
@@ -358,7 +358,7 @@ public class MongoDbInputDataTest {
   }
 
   @Test public void testArrayUnwindArrayFieldsOnly() throws KettleException {
-    Object mongoO = JSON.parse( s_testData2 );
+    Object mongoO = BasicDBObject.parse( s_testData2 );
     assertTrue( mongoO instanceof DBObject );
 
     List<MongoField> fields = new ArrayList<MongoField>();
@@ -394,8 +394,7 @@ public class MongoDbInputDataTest {
   }
 
   @Test public void testArrayUnwindOneArrayExpandFieldAndOneNormalField() throws KettleException {
-    Object mongoO = JSON.parse( s_testData2 );
-    assertTrue( mongoO instanceof DBObject );
+    Object mongoO = BasicDBObject.parse( s_testData2 );
 
     List<MongoField> fields = new ArrayList<MongoField>();
 
@@ -443,8 +442,7 @@ public class MongoDbInputDataTest {
   }
 
   @Test public void testArrayUnwindWithOneExistingAndOneNonExistingField() throws KettleException {
-    Object mongoO = JSON.parse( s_testData2 );
-    assertTrue( mongoO instanceof DBObject );
+    Object mongoO = BasicDBObject.parse( s_testData2 );
 
     List<MongoField> fields = new ArrayList<MongoField>();
 

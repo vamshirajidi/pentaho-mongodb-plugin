@@ -1,5 +1,5 @@
 /*!
- * Copyright 2010 - 2020 Hitachi Vantara.  All rights reserved.
+ * Copyright 2010 - 2021 Hitachi Vantara.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.step.BaseStepData;
@@ -602,7 +602,7 @@ public class MongoDbOutputData extends BaseStepData implements StepDataInterface
 
           if ( vm.isString() ) {
             String val = vm.getString( row[ index ] );
-            query = (BasicDBObject) JSON.parse( val );
+            query = BasicDBObject.parse( val );
           } else {
             throw new KettleException(
               BaseMessages.getString( PKG, "MongoDbOutput.Messages.MatchFieldJSONButIncomingValueNotString" ) );
@@ -662,14 +662,13 @@ public class MongoDbOutputData extends BaseStepData implements StepDataInterface
     // the easy case
     if ( hasTopLevelJSONDocInsert ) {
       for ( MongoDbOutputMeta.MongoField f : fieldDefs ) {
-        if ( f.m_JSON && Const.isEmpty( f.m_mongoDocPath ) && !f.m_useIncomingFieldNameAsMongoFieldName ) {
+        if ( f.m_JSON && Utils.isEmpty( f.m_mongoDocPath ) && !f.m_useIncomingFieldNameAsMongoFieldName ) {
           String incomingFieldName = f.environUpdatedFieldName;
           int index = inputMeta.indexOfValue( incomingFieldName );
           ValueMetaInterface vm = inputMeta.getValueMeta( index );
           if ( !vm.isNull( row[ index ] ) ) {
             String jsonDoc = vm.getString( row[ index ] );
-            DBObject docToInsert = (DBObject) JSON.parse( jsonDoc );
-            return docToInsert;
+            return BasicDBObject.parse( jsonDoc );
           } else {
             return null;
           }
@@ -808,7 +807,7 @@ public class MongoDbOutputData extends BaseStepData implements StepDataInterface
     if ( kettleType.isString() ) {
       String val = kettleType.getString( kettleValue );
       if ( kettleValueIsJSON ) {
-        Object mongoO = JSON.parse( val );
+        Object mongoO = BasicDBObject.parse( val );
         mongoObject.put( lookup.toString(), mongoO );
       } else {
         mongoObject.put( lookup.toString(), val );

@@ -17,9 +17,11 @@
 
 package org.pentaho.di.trans.steps.mongodbinput;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.ServerAddress;
-import com.mongodb.util.JSON;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -118,9 +120,9 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     when( stepMetaInterface.getJsonQuery() ).thenReturn( query );
     when( stepMetaInterface.getQueryIsPipeline() ).thenReturn( true );
     String[] parts = query.split( "," );
-    DBObject dbObjQuery = (DBObject) JSON.parse( parts[ 0 ] );
+    DBObject dbObjQuery = (DBObject) BasicDBObject.parse( parts[ 0 ] );
     DBObject[] remainder = parts.length > 1
-      ? new DBObject[] { (DBObject) JSON.parse( parts[ 1 ] ) }
+      ? new DBObject[] { (DBObject) BasicDBObject.parse( parts[ 1 ] ) }
       : new DBObject[ 0 ];
     when( mongoCollectionWrapper.aggregate( dbObjQuery, remainder ) ).thenReturn( cursor );
 
@@ -159,14 +161,14 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     verify( mockLog, times( 2 ) ).logError( "error msg" );
   }
 
-  @Test public void testFindWithMoreResults() throws KettleException, MongoDbException {
+  @Test public void testFindWithMoreResults() throws Exception {
     // no query or fields defined, should do a collection.find()
     setupReturns();
     when( mockCursor.hasNext() ).thenReturn( true );
     ServerAddress serverAddress = mock( ServerAddress.class );
     when( serverAddress.toString() ).thenReturn( "serveraddress" );
     when( mockCursor.getServerAddress() ).thenReturn( serverAddress );
-    DBObject nextDoc = (DBObject) JSON.parse( "{ 'foo' : 'bar' }" );
+    DBObject nextDoc = (DBObject) BasicDBObject.parse( "{ 'foo' : 'bar' }" );
     when( mockCursor.next() ).thenReturn( nextDoc );
     dbInput.setStopped( false );
     dbInput.init( stepMetaInterface, stepDataInterface );
@@ -177,7 +179,7 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     verify( mockLog ).logBasic( stringCaptor.capture() );
     assertThat( stringCaptor.getValue(), containsString( "serveraddress" ) );
     assertThat( stepDataInterface.cursor, equalTo( mockCursor ) );
-    assertThat( putRow[ 0 ], CoreMatchers.<Object>equalTo( JSON.serialize( nextDoc ) ) );
+    assertThat( putRow[ 0 ], CoreMatchers.<Object>equalTo( new ObjectMapper().writeValueAsString( nextDoc ) ) );
   }
 
   @Test public void testFindWithQuery() throws KettleException, MongoDbException {
@@ -190,7 +192,7 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
       dbInput.processRow( stepMetaInterface, stepDataInterface ) );
     verify( mongoCollectionWrapper ).find( dbObjectCaptor.capture(), any( DBObject.class ) );
     assertThat( stepDataInterface.cursor, equalTo( mockCursor ) );
-    assertThat( dbObjectCaptor.getValue(), equalTo( (DBObject) JSON.parse( query ) ) );
+    assertThat( dbObjectCaptor.getValue(), equalTo( BasicDBObject.parse( query ) ) );
   }
 
   @Test public void testAuthUserLogged() throws MongoDbException {
@@ -214,10 +216,11 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     assertTrue( dbInput.processRow( stepMetaInterface, stepDataInterface ) );
     verify( mongoCollectionWrapper ).find( dbObjectCaptor.capture(), any( DBObject.class ) );
     assertThat( dbObjectCaptor.getValue(),
-      equalTo( (DBObject) JSON.parse( "{foo : 'bar'}" ) ) );
+      equalTo( BasicDBObject.parse( "{foo : 'bar'}" ) ) );
   }
 
-  @Test public void testOutputRowsForExecuteForEachIncomingRowTrue() throws MongoDbException, KettleException {
+  @Test public void testOutputRowsForExecuteForEachIncomingRowTrue()
+    throws MongoDbException, KettleException, JsonProcessingException {
     setupReturns();
     when( stepMetaInterface.getExecuteForEachIncomingRow() )
       .thenReturn( true );
@@ -240,7 +243,7 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     ServerAddress serverAddress = mock( ServerAddress.class );
     when( serverAddress.toString() ).thenReturn( "serveraddress" );
     when( mockCursor.getServerAddress() ).thenReturn( serverAddress );
-    DBObject nextDoc = (DBObject) JSON.parse( "{ '_id' : 'ObjectId(60e433324a1cb8ec4ccd9758)',"
+    DBObject nextDoc = BasicDBObject.parse( "{ '_id' : 'ObjectId(60e433324a1cb8ec4ccd9758)',"
       + "'Company' : 'Portugal','Name': 'steve' ,'gender' : 'Male' }" );
     when( mockCursor.next() ).thenReturn( nextDoc );
     dbInput.setStopped( false );
@@ -254,13 +257,14 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
 
 
     assertThat( dbObjectCaptor.getValue(),
-      equalTo( (DBObject) JSON.parse( "{Company : 'HC'}" ) ) );
+      equalTo( BasicDBObject.parse( "{Company : 'HC'}" ) ) );
     assertThat( putRow[ 0 ], equalTo( row[ 0 ] ) );
     assertThat( putRow[ 1 ], equalTo( row[ 1 ] ) );
-    assertThat( putRow[ 2 ], CoreMatchers.<Object>equalTo( JSON.serialize( nextDoc ) ) );
+    assertThat( putRow[ 2 ], CoreMatchers.<Object>equalTo( new ObjectMapper().writeValueAsString( nextDoc ) ) );
   }
 
-  @Test public void testOutputRowsForExecuteForEachIncomingRowFalse() throws MongoDbException, KettleException {
+  @Test public void testOutputRowsForExecuteForEachIncomingRowFalse()
+    throws MongoDbException, KettleException, JsonProcessingException {
     setupReturns();
     when( stepMetaInterface.getExecuteForEachIncomingRow() )
       .thenReturn( false );
@@ -282,7 +286,7 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     ServerAddress serverAddress = mock( ServerAddress.class );
     when( serverAddress.toString() ).thenReturn( "serveraddress" );
     when( mockCursor.getServerAddress() ).thenReturn( serverAddress );
-    DBObject nextDoc = (DBObject) JSON.parse(
+    DBObject nextDoc = BasicDBObject.parse(
       "{ '_id' : 'ObjectId(60e433324a1cb8ec4ccd9758)','Company' : 'Portugal','Name': 'steve' ,'gender' : 'Male' }" );
     when( mockCursor.next() ).thenReturn( nextDoc );
     dbInput.setStopped( false );
@@ -294,7 +298,7 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     verify( mockCursor ).next();
     assertThat( stepDataInterface.cursor, equalTo( mockCursor ) );
 
-    assertThat( putRow[ 0 ], CoreMatchers.<Object>equalTo( JSON.serialize( nextDoc ) ) );
+    assertThat( putRow[ 0 ], CoreMatchers.<Object>equalTo( new ObjectMapper().writeValueAsString( nextDoc ) ) );
   }
 
   @Test public void testOutputRowsForExecuteForEachIncomingRowFields() throws MongoDbException, KettleException  {
@@ -328,7 +332,7 @@ public class MongoDbInputTest extends BaseMongoDbStepTest {
     when( serverAddress.toString() ).thenReturn( "serveraddress" );
     when( mockCursor.getServerAddress() ).thenReturn( serverAddress );
 
-    DBObject nextDoc = (DBObject) JSON.parse( "{ '_id' : 'ObjectId(60e433324a1cb8ec4ccd9758)', 'Company' : 'Portugal','Name': 'steve' ,'gender' : 'Male' }" );
+    DBObject nextDoc = BasicDBObject.parse( "{ '_id' : 'ObjectId(60e433324a1cb8ec4ccd9758)', 'Company' : 'Portugal','Name': 'steve' ,'gender' : 'Male' }" );
     Object[][] output = new Object[][]{ { null, null, "HC", 1000 } };
 
     when( stepDataInterface.mongoDocumentToKettle( nextDoc, dbInput ) ).thenReturn( output );

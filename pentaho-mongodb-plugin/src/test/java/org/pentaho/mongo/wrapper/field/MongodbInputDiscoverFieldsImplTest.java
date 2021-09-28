@@ -29,7 +29,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -170,7 +169,7 @@ public class MongodbInputDiscoverFieldsImplTest {
   @Test public void testArraysInArrays() throws MongoDbException, KettleException {
     setupPerform();
     VariableSpace vars = mock( VariableSpace.class );
-    DBObject doc = (DBObject) JSON.parse(
+    DBObject doc = BasicDBObject.parse(
         "{ top : [ { parentField1 :  "
             + "[ 'nested1', 'nested2']   },"
             + " {parentField2 : [ 'nested3' ] } ] }" );
@@ -190,7 +189,7 @@ public class MongodbInputDiscoverFieldsImplTest {
 
     // Setup DBObjects collection
     List<DBObject> dbObjects = new ArrayList<DBObject>();
-    DBObject firstOp = (DBObject) JSON.parse( query );
+    DBObject firstOp = BasicDBObject.parse( query );
     DBObject[] remainder = { new BasicDBObject( "$limit", NUM_DOCS_TO_SAMPLE ) };
     dbObjects.add( firstOp );
     Collections.addAll( dbObjects, remainder );
@@ -347,7 +346,7 @@ public class MongodbInputDiscoverFieldsImplTest {
   @Test
   public void testDocToFields() {
     Map<String, MongoField> fieldMap = new LinkedHashMap<String, MongoField>();
-    DBObject doc = (DBObject) JSON.parse( "{\"fred\" : {\"george\" : 1}, \"bob\" : [1 , 2]}" );
+    DBObject doc = BasicDBObject.parse( "{\"fred\" : {\"george\" : 1}, \"bob\" : [1 , 2]}" );
 
     MongodbInputDiscoverFieldsImpl.docToFields( doc, fieldMap );
     assertThat( 3, equalTo( fieldMap.size() ) );

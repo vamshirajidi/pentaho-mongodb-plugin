@@ -24,7 +24,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;
@@ -36,6 +35,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.steps.mongodbinput.DiscoverFieldsCallback;
@@ -98,8 +98,8 @@ public class MongodbInputDiscoverFieldsImpl implements MongoDbInputDiscoverField
               if ( Const.isEmpty( query ) && Const.isEmpty( fields ) ) {
                 cursor = dbcollection.find().limit( numDocsToSample );
               } else {
-                DBObject dbObject = (DBObject) JSON.parse( Const.isEmpty( query ) ? "{}" : query ); //$NON-NLS-1$
-                DBObject dbObject2 = (DBObject) JSON.parse( fields );
+                DBObject dbObject = BasicDBObject.parse( Utils.isEmpty( query ) ? "{}" : query ); //$NON-NLS-1$
+                DBObject dbObject2 = BasicDBObject.parse( fields );
                 cursor = dbcollection.find( dbObject, dbObject2 ).limit( numDocsToSample );
               }
             }
@@ -490,8 +490,8 @@ public class MongodbInputDiscoverFieldsImpl implements MongoDbInputDiscoverField
     }
 
     for ( String p : parts ) {
-      if ( !Const.isEmpty( p ) ) {
-        DBObject o = (DBObject) JSON.parse( p );
+      if ( !Utils.isEmpty( p ) ) {
+        DBObject o = BasicDBObject.parse( p );
         pipeline.add( o );
       }
     }

@@ -17,15 +17,17 @@
 
 package org.pentaho.di.trans.steps.mongodbinput;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
 import com.mongodb.Cursor;
 import com.mongodb.DBObject;
 import com.mongodb.ServerAddress;
-import com.mongodb.util.JSON;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -110,7 +112,7 @@ public class MongoDbInput extends BaseStep implements StepInterface {
         }
 
         if ( meta.getOutputJson() || meta.getMongoFields() == null || meta.getMongoFields().isEmpty() ) {
-          String json = JSON.serialize( nextDoc );
+          String json = new ObjectMapper().writeValueAsString( nextDoc.toMap() );
           row = RowDataUtil.allocateRowData( data.outputRowMeta.size() );
 
           if ( meta.getExecuteForEachIncomingRow() && m_currentInputRowDrivingQuery != null ) {
@@ -227,9 +229,9 @@ public class MongoDbInput extends BaseStep implements StepInterface {
 
         logDetailed( BaseMessages.getString( PKG, "MongoDbInput.Message.ExecutingQuery", query ) );
 
-        DBObject dbObject = (DBObject) JSON.parse( Const.isEmpty( query ) ? "{}" //$NON-NLS-1$
+        DBObject dbObject = BasicDBObject.parse( Utils.isEmpty( query ) ? "{}" //$NON-NLS-1$
             : query );
-        DBObject dbObject2 = (DBObject) JSON.parse( fields );
+        DBObject dbObject2 = BasicDBObject.parse( Utils.isEmpty( fields ) ? "{}" : fields );
         data.cursor = data.collection.find( dbObject, dbObject2 );
       }
     }

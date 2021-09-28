@@ -17,8 +17,8 @@
 
 package org.pentaho.di.ui.trans.steps.mongodbinput;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CTabFolder;
@@ -1728,7 +1728,7 @@ public class MongoDbInputDialog extends BaseStepDialog implements StepDialogInte
           set = set + "}"; //$NON-NLS-1$
         }
 
-        DBObject setO = (DBObject) JSON.parse( set );
+        DBObject setO = BasicDBObject.parse( set );
         if ( setO != null ) {
           tagSets.add( setO );
         }
